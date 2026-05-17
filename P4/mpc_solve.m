@@ -1,7 +1,8 @@
-function u0 = mpc_solve(x0, H, R, A, B, C)
+function u0 = mpc_solve(x0, H, R, A, B, C, lb, ub)
 % MPC_SOLVE  Solve the unconstrained MPC regulator using quadprog.
 %
-%   u0 = mpc_solve(x0, H, R, A, B, C)
+%   u0 = mpc_solve(x0, H, R, A, B, C)          % unconstrained (Q2)
+%   u0 = mpc_solve(x0, H, R, A, B, C, lb, ub)  % control bounds (Q3)
 %
 %   Solves the finite-horizon quadratic MPC problem (dense formulation):
 %
@@ -24,12 +25,18 @@ function u0 = mpc_solve(x0, H, R, A, B, C)
 %     A   – n×n state matrix  (from identified model)
 %     B   – n×1 input matrix  (scalar input assumed)
 %     C   – 1×n output matrix (scalar output assumed)
+%     lb  – H×1 lower bound on DU (pass [] for unconstrained)
+%     ub  – H×1 upper bound on DU (pass [] for unconstrained)
 %
 %   Output
 %     u0  – scalar, first optimal control action to apply to the plant
 %
 %   Note: this function will be extended in Q3 (control constraints),
 %   Q4 (tracking via change of variables) and Q5 (soft output constraint).
+
+%% ── Default: unconstrained if lb/ub not provided ─────────────────────────
+if nargin < 7,  lb = []; end
+if nargin < 8,  ub = []; end
 
 %% ── Build prediction matrices (same as compute_KRH) ─────────────────────
 n = size(A, 1);
@@ -60,7 +67,7 @@ f = 2 * W' * Pi * x0;
 
 %% ── Solve with quadprog ──────────────────────────────────────────────────
 opts = optimoptions('quadprog', 'Display', 'off');
-U_opt = quadprog(F, f, [], [], [], [], [], [], [], opts);
+U_opt = quadprog(F, f, [], [], [], [], lb, ub, [], opts);
 
 %% ── Receding horizon: apply only first control action ────────────────────
 u0 = U_opt(1);
