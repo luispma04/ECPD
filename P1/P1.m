@@ -97,19 +97,19 @@ figure(2)
 surf(xx1, xx2, ff); % Standard surf creates the 'squares grid'
 hold on
 
-% --- NEW: Create and plot the 3D constraint plane ---
-% Determine the vertical bounds based on the evaluated function
-z_min = min(ff(:)); 
-z_max = max(ff(:)); 
-
-% Create a meshgrid for the plane spanning x2 and z
-[P_x2, P_z] = meshgrid([x2min, x2max], [z_min, z_max]);
-
-% The constraint is fixed at x1 = 0.5
-P_x1 = 0.5 * ones(size(P_x2));
-
-% Plot the plane (red, 50% transparent, no grid lines on the plane)
-surf(P_x1, P_x2, P_z, 'FaceColor', 'r', 'FaceAlpha', 0.5, 'EdgeColor', 'none');
+% --- Plot the constraint as a red line lying on the surface ---
+% The constraint is x1 = 0.5; sweep x2 over its range
+Nc = 200;
+z2c_3d = linspace(x2min, x2max, Nc);
+z1c_3d = 0.5 * ones(size(z2c_3d));
+% Evaluate Rosenbrock along the constraint line
+f_constr = zeros(1, Nc);
+for k = 1:Nc
+    f_constr(k) = Rosenbrock([z1c_3d(k); z2c_3d(k)]);
+end
+% Draw the curve on the surface
+plot3(z1c_3d, z2c_3d, f_constr, 'r', 'LineWidth', 2);
+legend('Rosenbrock surface', 'Constraint x_1 = 0.5', 'Location', 'best');
 
 % Identifies axis
 gg = xlabel('x_1'); set(gg, 'FontSize', 14);
