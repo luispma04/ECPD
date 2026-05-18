@@ -95,11 +95,30 @@ hold off
 
 figure(2)
 surf(xx1, xx2, ff); % Standard surf creates the 'squares grid'
+hold on
+
+% --- NEW: Create and plot the 3D constraint plane ---
+% Determine the vertical bounds based on the evaluated function
+z_min = min(ff(:)); 
+z_max = max(ff(:)); 
+
+% Create a meshgrid for the plane spanning x2 and z
+[P_x2, P_z] = meshgrid([x2min, x2max], [z_min, z_max]);
+
+% The constraint is fixed at x1 = 0.5
+P_x1 = 0.5 * ones(size(P_x2));
+
+% Plot the plane (red, 50% transparent, no grid lines on the plane)
+surf(P_x1, P_x2, P_z, 'FaceColor', 'r', 'FaceAlpha', 0.5, 'EdgeColor', 'none');
 
 % Identifies axis
 gg = xlabel('x_1'); set(gg, 'FontSize', 14);
 gg = ylabel('x_2'); set(gg, 'FontSize', 14);
 gg = zlabel('f(x)'); set(gg, 'FontSize', 14);
 
+% Optional: Set a good default 3D viewing angle to see the intersection
+view([-45, 30]); 
+
+hold off
 %--------------------------------------------------------------------------
-% End of File
+
