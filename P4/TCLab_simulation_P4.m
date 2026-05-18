@@ -22,11 +22,10 @@ addpath(fullfile(base, '../P3'));          % singleheater_model.mat
 addpath(fullfile(base, '../P4'));          % mpc_solve.m
 
 % ── Load model ────────────────────────────────────────────────────────────
-load('singleheater_model.mat','A','B','C','Ke','e_var','y_ss','u_ss','Ts');
+load('singleheater_model_n2.mat','A','B','C','Ke','e_var','y_ss','u_ss','Ts');
 n = size(A,1);
 
 % Noise: keep at 0 during MPC tuning (ideal conditions)
-% e_std = sqrt(e_var);
 e_std = 0;
 
 % ── Simulation parameters ─────────────────────────────────────────────────
@@ -34,9 +33,11 @@ T = 4000;       % Experiment duration [s]
 N = T/Ts;       % Number of samples
 
 % ── Initial incremental state ─────────────────────────────────────────────
-% Ambient corresponds to absolute u=0, i.e. Du = -u_ss.
-% Incremental equilibrium: (I-A)*Dx = B*Du = -B*u_ss
-Dx0 = -(eye(n) - A) \ (B * u_ss);
+% Start the simulation exactly 10 degrees below the steady-state equilibrium.
+% This ensures we test the controller within the model's valid linear region,
+% avoiding the "ambient blind spot" while still forcing a transient response.
+Dy_start = -5; 
+Dx0 = pinv(C) * Dy_start;
 
 %% ═══════════════════════════════════════════════════════════════════════
 %  Q2 — UNCONSTRAINED MPC
@@ -85,8 +86,8 @@ subplot(2,1,1), legend('Location','best')
 subplot(2,1,2), legend('Location','best')
 
 %% ── Q2 Study 2: Effect of R (H fixed at chosen value) ───────────────────
-H_chosen = 100;      % <-- update after analysing Study 1
-R_list   = [0.001, 0.01, 0.1, 1, 10, 100];
+H_chosen = 50;      % <-- update after analysing Study 1
+R_list   = [0.01, 0.05, 0.1, 1, 10, 100];
 
 colors_R = lines(length(R_list));
 
@@ -134,8 +135,7 @@ subplot(2,1,2), legend('Location','best')
 lb = -u_ss       * ones(H_chosen, 1);   % Du >= -u_ss  =>  u >= 0
 ub = (100-u_ss)  * ones(H_chosen, 1);   % Du <= 100-u_ss  =>  u <= 100
 
-R_Q3 = 0.01;    % <-- tune until saturation appears
-
+R_Q3 = 0.05;    % <-- tune until saturation appears
 fprintf('Q3 — H=%d, R=%.3f (constrained) ...\n', H_chosen, R_Q3)
 
 t  = nan(1,N);
@@ -147,7 +147,11 @@ Dx(:,1) = Dx0;
 for k = 1:N
     t(k)      = (k-1)*Ts;
     Dy(k)     = C*Dx(:,k) + e_std*randn;
+    
+    % Note: If you experience numeric chattering with H=100 and dense solver,
+    % you can swap this to mpc_solve_sparse(...)
     Du(k)     = mpc_solve(Dx(:,k), H_chosen, R_Q3, A, B, C, lb, ub);   % constrained
+    
     Dx(:,k+1) = A*Dx(:,k) + B*Du(k) + Ke*e_std*randn;
 end
 
