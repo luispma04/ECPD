@@ -36,7 +36,7 @@ N = T/Ts;       % Number of samples
 % Start the simulation exactly 10 degrees below the steady-state equilibrium.
 % This ensures we test the controller within the model's valid linear region,
 % avoiding the "ambient blind spot" while still forcing a transient response.
-Dy_start = -5; 
+Dy_start = -26; %20ºC
 Dx0 = pinv(C) * Dy_start;
 
 %% ═══════════════════════════════════════════════════════════════════════
@@ -135,7 +135,7 @@ subplot(2,1,2), legend('Location','best')
 lb = -u_ss       * ones(H_chosen, 1);   % Du >= -u_ss  =>  u >= 0
 ub = (100-u_ss)  * ones(H_chosen, 1);   % Du <= 100-u_ss  =>  u <= 100
 
-R_Q3 = 0.05;    % <-- tune until saturation appears
+R_Q3 = 0.04;    % <-- tune until saturation appears
 fprintf('Q3 — H=%d, R=%.3f (constrained) ...\n', H_chosen, R_Q3)
 
 t  = nan(1,N);
