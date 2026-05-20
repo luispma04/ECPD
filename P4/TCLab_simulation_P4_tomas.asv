@@ -103,7 +103,7 @@ subplot(2,1,2), legend('Location','best')
 %% ── Q2 Study 2: Effect of R (H fixed at chosen value) ───────────────────
 % After analysing Study 1, set H_chosen to the value where the response
 % has converged. R is then varied to study its effect on aggressiveness.
-H_chosen = 50;      % <-- update after analysing Study 1
+H_chosen = 10;      % <-- update after analysing Study 1
 R_list   = [0.1, 1, 10, 100];
 
 colors_R = lines(length(R_list));
@@ -164,7 +164,7 @@ ub = (100-u_ss)  * ones(H_chosen, 1);   % Du <= 100-u_ss  =>  u <= 100
 
 % Choose R small enough that the control saturates
 % Decrease R until saturation is visible in the plot
-R_Q3 = 0.04;    % <-- tune this: try 1, 0.5, 0.1, 0.01
+R_Q3 = 0.1;    % <-- tune this: try 1, 0.5, 0.1, 0.01
 
 fprintf('Q3 — H=%d, R=%.3f (constrained) ...\n', H_chosen, R_Q3)
 
@@ -240,6 +240,7 @@ ub = (100-u_ss)  * ones(H_chosen, 1);   % Du <= 100-u_ss  =>  u <= 100
 % Choose R small enough that the control saturates
 % Decrease R until saturation is visible in the plot
 
+R_Q4 = 0.1;    
 
 fprintf('Q4 — H=%d, R=%.3f (constrained) ...\n', H_chosen, R_Q3)
 
@@ -308,6 +309,7 @@ ub = (100-u_ss)  * ones(H_chosen, 1);   % Du <= 100-u_ss  =>  u <= 100
 % Choose R small enough that the control saturates
 % Decrease R until saturation is visible in the plot
 
+R_Q4 = 0.1;    
 
 fprintf('Q4 — H=%d, R=%.3f (constrained) ...\n', H_chosen, R_Q3)
 
@@ -342,7 +344,7 @@ end
 % Plot absolute variables
 figure('Units','normalized','Position',[0.2 0.05 0.3 0.4])
 subplot(2,1,1), hold on, grid on
-title(sprintf('Q4 (perturbed) — Absolute  (H=%d, R=%.3f, constrained)', H_chosen, R_Q3))
+title(sprintf('Q4 — Absolute  (H=%d, R=%.3f, constrained)', H_chosen, R_Q3))
 plot(t, y, '.', 'MarkerSize', 5)
 yl = yline(y_ss,'k--');
 xlabel('Time [s]'), ylabel('y [°C]')
@@ -358,7 +360,7 @@ legend(yl,'$\bar{u}$','Interpreter','latex','Location','best')
 % Plot incremental variables
 figure('Units','normalized','Position',[0.5 0.05 0.3 0.4])
 subplot(2,1,1), hold on, grid on
-title(sprintf('Q4 (perturbed) — Incremental  (H=%d, R=%.3f, constrained)', H_chosen, R_Q3))
+title(sprintf('Q4 — Incremental  (H=%d, R=%.3f, constrained)', H_chosen, R_Q3))
 plot(t, Dy, '.', 'MarkerSize', 5)
 yline(0,'k--')
 xlabel('Time [s]'), ylabel('\Delta y [°C]')
