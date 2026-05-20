@@ -29,7 +29,7 @@ n = size(A,1);
 e_std = 0;
 
 % ── Simulation parameters ─────────────────────────────────────────────────
-T = 4000;       % Experiment duration [s]
+T = 1000;       % Experiment duration [s]
 N = T/Ts;       % Number of samples
 
 % ── Initial incremental state ─────────────────────────────────────────────
@@ -87,7 +87,7 @@ subplot(2,1,2), legend('Location','best')
 
 %% ── Q2 Study 2: Effect of R (H fixed at chosen value) ───────────────────
 H_chosen = 50;      % <-- update after analysing Study 1
-R_list   = [0.01, 0.05, 0.1, 1, 10, 100];
+R_list   = [0.01, 0.025, 0.04, 0.05, 0.1, 1];
 
 colors_R = lines(length(R_list));
 

@@ -95,11 +95,30 @@ hold off
 
 figure(2)
 surf(xx1, xx2, ff); % Standard surf creates the 'squares grid'
+hold on
+
+% --- Plot the constraint as a red line lying on the surface ---
+% The constraint is x1 = 0.5; sweep x2 over its range
+Nc = 200;
+z2c_3d = linspace(x2min, x2max, Nc);
+z1c_3d = 0.5 * ones(size(z2c_3d));
+% Evaluate Rosenbrock along the constraint line
+f_constr = zeros(1, Nc);
+for k = 1:Nc
+    f_constr(k) = Rosenbrock([z1c_3d(k); z2c_3d(k)]);
+end
+% Draw the curve on the surface
+plot3(z1c_3d, z2c_3d, f_constr, 'r', 'LineWidth', 2);
+legend('Rosenbrock surface', 'Constraint x_1 = 0.5', 'Location', 'best');
 
 % Identifies axis
 gg = xlabel('x_1'); set(gg, 'FontSize', 14);
 gg = ylabel('x_2'); set(gg, 'FontSize', 14);
 gg = zlabel('f(x)'); set(gg, 'FontSize', 14);
 
+% Optional: Set a good default 3D viewing angle to see the intersection
+view([-45, 30]); 
+
+hold off
 %--------------------------------------------------------------------------
-% End of File
+
