@@ -1,5 +1,5 @@
 function u0 = mpc_solve(x0, H, R, A, B, C, lb, ub)
-%% Model Predictive Control Solver (Quadprog Formulation)
+%% Dense MPC Solver (Quadprog Formulation)
 %--------------------------------------------------------------------------
 % Solves the finite-horizon quadratic MPC regulator problem (dense 
 % formulation) using quadratic programming (quadprog).
