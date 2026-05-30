@@ -1,18 +1,23 @@
 function f = Rosenbrock(x)
-%   This function computes the Rosenbrock function in 2 dimensions at a point.
-%   The argument x of the function is a 2-dimensional vector;
-%   The function computes the value of the Rosenbrock function at x.
+% ROSENBROCK Computes the value of the Rosenbrock function in 2D.
 %
+% Input:
+%   x - A 2-dimensional vector [x1; x2]
+%
+% Output:
+%   f - Value of the function at point x
+%
+% Formula:
 %   f(x1, x2) = 100*(x2 - x1^2)^2 + (1 - x1)^2
 %
-%   The global (unconstrained) minimum is at x* = [1; 1] with f(x*) = 0.
-%
-%   IST - MEEC - Distributed Predictive Control and Estimation
-%   Afonso Botelho, Joao Miranda Lemos, 2025
+% The global unconstrained minimum is located at [1; 1] where f = 0.
 %--------------------------------------------------------------------------
 
-f = 100*(x(2) - x(1)^2)^2 + (1 - x(1))^2;
+% Extract vector elements for clarity
+x1 = x(1);
+x2 = x(2);
+
+% Compute Rosenbrock function value
+f = 100 * (x2 - x1^2)^2 + (1 - x1)^2;
 
 end
-%--------------------------------------------------------------------------
-% End of file

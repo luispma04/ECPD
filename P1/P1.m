@@ -1,124 +1,98 @@
 % Illustrates the unconstrained and constrained minimization of the 
-% Rosenbrock function following the structure of ProbBasic.m.
+% Rosenbrock function.
 %
-% Matlab sw required: optimization toolbox
-% Functions called
-%    fminunc    - Matlab function for unconstrained minimization
-%    fmincon    - Matlab function for constrained minimization
-%    Rosenbrock - user defined function to be minimized
-%
-% IST, MEEC, Distributed Predictive Control and Estimation
-% Afonso Botelho, Joao Miranda Lemos, 2025
+% Matlab Toolboxes: Optimization Toolbox
+% Functions: fminunc, fmincon, Rosenbrock
 %--------------------------------------------------------------------------
 
-%--------------------------------------------------------------------------
-% Plots function level curves
+%% 1. Setup Mesh Grid and Function Surface
+% Range of independent variables
+x1_min = -2;   x1_max = 2;
+x2_min = -0.5; x2_max = 3.5;
 
-% Range of independent variables to consider (Adjusted for Rosenbrock)
-x1min = -2;
-x1max = 2;
-x2min = -0.5;
-x2max = 3.5;
+% Grid discretization
+n1 = 100; % Points along x1 axis
+n2 = 100; % Points along x2 axis
 
-% Number of intervals in the mesh grid
-N1 = 100;
-N2 = 100;
+x_vec1 = linspace(x1_min, x1_max, n1);
+x_vec2 = linspace(x2_min, x2_max, n2);
+[xx1, xx2] = meshgrid(x_vec1, x_vec2);
 
-xv1 = linspace(x1min, x1max, N1);
-xv2 = linspace(x2min, x2max, N2);
-[xx1, xx2] = meshgrid(xv1, xv2);
-
-% Computes the function at the different points of the mesh grid
-for ii = 1:N1
-    for jj = 1:N2
-        x = [xx1(ii,jj); xx2(ii,jj)];
-        ff(ii,jj) = Rosenbrock(x);
+% Evaluate Rosenbrock function across the grid
+ff = zeros(n1, n2);
+for ii = 1:n1
+    for jj = 1:n2
+        x_point = [xx1(ii,jj); xx2(ii,jj)];
+        ff(ii,jj) = Rosenbrock(x_point);
     end
 end
 
-% Plots the level curves using the Matlab function contour
-Nlevel = 20;  
-LW = 'linewidth'; FS = 'fontsize'; MS = 'markersize';
-figure(1), contour(xv1, xv2, ff, Nlevel, LW, 1.2), colorbar
-axis([x1min x1max x2min x2max]), axis square
-hold on
+%% 2. Plot Level Curves
+% Visualization parameters
+n_level = 20;     % Number of contour lines
+lw      = 1.2;    % Line width
+fs      = 14;     % Font size
 
-%--------------------------------------------------------------------------
-% Compute the minimum
+figure(1);
+contour(x_vec1, x_vec2, ff, n_level, 'linewidth', lw);
+colorbar;
+axis([x1_min x1_max x2_min x2_max]); 
+axis square;
+hold on;
 
-% Initial estimate of the minimum
+%% 3. Compute Minima
+% Initial guess
 x0 = [-1; 1];
 
-% Define the options to be used with the fminunc solver
+% Unconstrained optimization
 options = optimoptions('fminunc', 'Algorithm', 'quasi-newton');
+x_opt = fminunc(@Rosenbrock, x0, options);
 
-% Uses the solver fminunc to compute the unconstrained minimum
-xopt = fminunc(@Rosenbrock, x0, options);
+% Constrained optimization (x1 <= 0.5)
+% Formulated as A_c * x <= B_c
+A_c = [1 0];
+B_c = 0.5;
+x_opt_constr = fmincon(@Rosenbrock, x0, A_c, B_c);
 
-%--------------------------------------------------------------------------
-% Computes the constrained minimum associated to the constraint x1 <= 0.5
-% Written as Ac*x <= Bc
+%% 4. Annotate Plot
+% Plot markers
+plot(x0(1), x0(2), 'or', 'LineWidth', 1.5);           % Initial guess
+plot(x_opt(1), x_opt(2), 'xr', 'LineWidth', 1.5);     % Unconstrained min
+plot(x_opt_constr(1), x_opt_constr(2), '*r', 'LineWidth', 1.5); % Constrained min
 
-Ac = [1 0];
-Bc = 0.5;
-xoptconstr = fmincon(@Rosenbrock, x0, Ac, Bc);
+% Plot constraint boundary (x1 = 0.5)
+z2_line = linspace(x2_min, x2_max, 100);
+z1_line = 0.5 * ones(size(z2_line));
+plot(z1_line, z2_line, 'k', 'LineWidth', 1.5);
 
-%--------------------------------------------------------------------------
-% Plots markers (using the same red color style as ProbBasic.m)
+% Axis labels
+xlabel('x_1', 'FontSize', fs);
+ylabel('x_2', 'FontSize', fs);
+hold off;
 
-% Initial point as a red circle
-gg = plot(x0(1), x0(2), 'or');
-set(gg, 'Linewidth', 1.5);
+%% 5. 3D Surface Visualization
+figure(2);
+surf(xx1, xx2, ff); 
+hold on;
 
-% Unconstrained minimum as a red cross
-gg = plot(xopt(1), xopt(2), 'xr');
-set(gg, 'Linewidth', 1.5);
+% Add constraint line projected on the surface
+n_c = 200;
+z2_3d = linspace(x2_min, x2_max, n_c);
+z1_3d = 0.5 * ones(size(z2_3d));
 
-% Constrained minimum as a red star
-gg = plot(xoptconstr(1), xoptconstr(2), '*r');
-set(gg, 'Linewidth', 1.5);
-
-% Plots the constraint boundary (x1 = 0.5)
-z2c = linspace(x2min, x2max, 100);
-z1c = 0.5 * ones(size(z2c));
-gg = plot(z1c, z2c, 'k');
-set(gg, 'Linewidth', 1.5);
-
-% Identifies axis
-gg = xlabel('x_1'); set(gg, 'FontSize', 14);
-gg = ylabel('x_2'); set(gg, 'FontSize', 14);
-
-hold off
-
-%--------------------------------------------------------------------------
-% Plots the 3d view of the function with the square grid
-
-figure(2)
-surf(xx1, xx2, ff); % Standard surf creates the 'squares grid'
-hold on
-
-% --- Plot the constraint as a red line lying on the surface ---
-% The constraint is x1 = 0.5; sweep x2 over its range
-Nc = 200;
-z2c_3d = linspace(x2min, x2max, Nc);
-z1c_3d = 0.5 * ones(size(z2c_3d));
-% Evaluate Rosenbrock along the constraint line
-f_constr = zeros(1, Nc);
-for k = 1:Nc
-    f_constr(k) = Rosenbrock([z1c_3d(k); z2c_3d(k)]);
+f_constr = zeros(1, n_c);
+for kk = 1:n_c
+    f_constr(kk) = Rosenbrock([z1_3d(kk); z2_3d(kk)]);
 end
-% Draw the curve on the surface
-plot3(z1c_3d, z2c_3d, f_constr, 'r', 'LineWidth', 2);
+
+plot3(z1_3d, z2_3d, f_constr, 'r', 'LineWidth', 2);
 legend('Rosenbrock surface', 'Constraint x_1 = 0.5', 'Location', 'best');
 
-% Identifies axis
-gg = xlabel('x_1'); set(gg, 'FontSize', 14);
-gg = ylabel('x_2'); set(gg, 'FontSize', 14);
-gg = zlabel('f(x)'); set(gg, 'FontSize', 14);
+% Label axes
+xlabel('x_1', 'FontSize', fs);
+ylabel('x_2', 'FontSize', fs);
+zlabel('f(x)', 'FontSize', fs);
 
-% Optional: Set a good default 3D viewing angle to see the intersection
+% Set viewing angle
 view([-45, 30]); 
-
-hold off
-%--------------------------------------------------------------------------
-
+hold off;
